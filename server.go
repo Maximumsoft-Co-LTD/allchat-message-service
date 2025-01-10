@@ -1,6 +1,7 @@
 package server
 
 import (
+	db "allchat-message-service/_config"
 	"allchat-message-service/internal/router"
 	"fmt"
 	"log"
@@ -10,17 +11,28 @@ import (
 	"github.com/fatih/color"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 )
 
 func StartServer() {
 	color.Green("Server starting...")
 	_ = godotenv.Load()
 
+	// database
+	resource, err := db.CreateResource()
+	if err != nil {
+		color.Red("Connection database failure, Please check connection")
+		color.Cyan(err.Error())
+		logrus.Error(err)
+	}
+	defer resource.Close()
+
 	// route
 	r := gin.Default()
 	r.Use(CORS)
 
 	router.Router(r)
+	router.Webhook(r, resource)
 
 	// server
 	port := os.Getenv("PORT")
