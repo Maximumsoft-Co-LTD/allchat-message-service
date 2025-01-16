@@ -2,6 +2,7 @@ package main
 
 import (
 	"allchat-message-service/internal/adapter/config"
+	"allchat-message-service/internal/adapter/storage/mongoDB"
 	"log"
 
 	"github.com/fatih/color"
@@ -17,12 +18,12 @@ func main() {
 		log.Fatalf("Error loading environment variables", err)
 	}
 
-	// // database
-	// resource, err := mongoDB.New(config.DB)
-	// if err != nil {
-	// 	log.Fatalf("Connection database failure, Please check connection", err)
-	// }
-	// defer resource.Close()
+	// database
+	resource, err := mongoDB.New(config.DB)
+	if err != nil {
+		log.Fatalf("Connection database failure, Please check connection", err)
+	}
+	defer resource.Close()
 
 	// // Init cache service
 	// ctx := context.Background()
