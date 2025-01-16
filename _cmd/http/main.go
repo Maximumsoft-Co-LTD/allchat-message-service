@@ -2,7 +2,9 @@ package main
 
 import (
 	"allchat-message-service/internal/adapter/config"
+	"allchat-message-service/internal/adapter/handler/http"
 	"allchat-message-service/internal/adapter/storage/mongoDB"
+	"fmt"
 	"log"
 
 	"github.com/fatih/color"
@@ -42,21 +44,21 @@ func main() {
 	// telegramService := service.NewTelegramService(telegramRepo, roomRepo, cache)
 	// telegramHandler := http.NewTelegramHandler(telegramService)
 
-	// // Router
-	// router, err := http.NewRouter(
-	// 	config.HTTP,
-	// 	*telegramHandler,
-	// )
-	// if err != nil {
-	// 	log.Fatalf("Error initializing router", err)
-	// }
+	// Router
+	router, err := http.NewRouter(
+		config.HTTP,
+		// *telegramHandler,
+	)
+	if err != nil {
+		log.Fatalf("Error initializing router", err)
+	}
 
-	// // server
-	// fmt.Printf("Server listening on port %s\n", config.HTTP.Port)
-	// listenAddr := fmt.Sprintf(":%s", config.HTTP.Port)
+	// server
+	fmt.Printf("Server listening on port %s\n", config.HTTP.Port)
+	listenAddr := fmt.Sprintf(":%s", config.HTTP.Port)
 
-	// err = router.Serve(listenAddr)
-	// if err != nil {
-	// 	log.Fatalf("listen: %s\n", err)
-	// }
+	err = router.Serve(listenAddr)
+	if err != nil {
+		log.Fatalf("listen: %s\n", err)
+	}
 }
