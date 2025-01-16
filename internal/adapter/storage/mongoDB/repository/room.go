@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -27,6 +28,7 @@ func (r *RoomRepository) CreateRoom(c context.Context, room domain.Room) error {
 	// ctx, cancel := db.InitContext()
 	// defer cancel()
 	fmt.Println("repo create room")
+	room.ID = primitive.NewObjectID()
 	_, err := r.DB.Collection(collection).InsertOne(c, room)
 	if err != nil {
 		fmt.Println("err", err)

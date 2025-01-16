@@ -31,4 +31,5 @@ func (h *TelegramHandler) Webhook(c *gin.Context) {
 	fmt.Println("handle webhook")
 	// telegram := domain.Telegram
 	h.svc.Webhook(c, req)
+	ResData(c, 200, "success", "", nil)
 }

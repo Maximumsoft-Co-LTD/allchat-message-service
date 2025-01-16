@@ -5,7 +5,9 @@ import (
 	"allchat-message-service/internal/adapter/handler/http"
 	"allchat-message-service/internal/adapter/storage/mongoDB"
 	"allchat-message-service/internal/adapter/storage/mongoDB/repository"
+	"allchat-message-service/internal/adapter/storage/redis"
 	"allchat-message-service/internal/core/service"
+	"context"
 	"fmt"
 	"log"
 
@@ -29,13 +31,13 @@ func main() {
 	}
 	defer resource.Close()
 
-	// // Init cache service
-	// ctx := context.Background()
-	// cache, err := redis.New(ctx, config.Redis)
-	// if err != nil {
-	// 	log.Fatalf("Error initializing cache connection", err)
-	// }
-	// defer cache.Close()
+	// Init cache service
+	ctx := context.Background()
+	cache, err := redis.New(ctx, config.Redis)
+	if err != nil {
+		log.Fatalf("Error initializing cache connection", err)
+	}
+	defer cache.Close()
 
 	// Dependency injection
 	//Room
@@ -43,8 +45,7 @@ func main() {
 
 	// //Telegram
 	telegramRepo := repository.NewTelegramRepository(resource.DB)
-	// telegramService := service.NewTelegramService(telegramRepo, roomRepo, cache)
-	telegramService := service.NewTelegramService(telegramRepo, roomRepo)
+	telegramService := service.NewTelegramService(telegramRepo, roomRepo, cache)
 	telegramHandler := http.NewTelegramHandler(telegramService)
 
 	// Router
