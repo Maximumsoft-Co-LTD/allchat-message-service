@@ -4,6 +4,7 @@ import (
 	"allchat-message-service/internal/adapter/config"
 	"allchat-message-service/internal/adapter/handler/http"
 	"allchat-message-service/internal/adapter/storage/mongoDB"
+	"allchat-message-service/internal/adapter/storage/mongoDB/repository"
 	"allchat-message-service/internal/core/service"
 	"fmt"
 	"log"
@@ -36,14 +37,14 @@ func main() {
 	// }
 	// defer cache.Close()
 
-	// // Dependency injection
-	// //Room
-	// roomRepo := repository.NewRoomRepository(resource.DB)
+	// Dependency injection
+	//Room
+	roomRepo := repository.NewRoomRepository(resource.DB)
 
 	// //Telegram
-	// telegramRepo := repository.NewTelegramRepository(resource.DB)
+	telegramRepo := repository.NewTelegramRepository(resource.DB)
 	// telegramService := service.NewTelegramService(telegramRepo, roomRepo, cache)
-	telegramService := service.NewTelegramService()
+	telegramService := service.NewTelegramService(telegramRepo, roomRepo)
 	telegramHandler := http.NewTelegramHandler(telegramService)
 
 	// Router
