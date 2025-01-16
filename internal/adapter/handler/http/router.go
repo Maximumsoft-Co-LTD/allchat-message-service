@@ -13,7 +13,7 @@ type Router struct {
 
 func NewRouter(
 	config *config.HTTP,
-	// telegramHandler TelegramHandler,
+	telegramHandler TelegramHandler,
 ) (*Router, error) {
 	if config.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
@@ -22,10 +22,10 @@ func NewRouter(
 	router := gin.Default()
 	router.Use(CORS)
 
-	// webhook := router.Group("/api/webhook")
-	// {
-	// 	webhook.POST("/telegram", telegramHandler.Webhook)
-	// }
+	webhook := router.Group("/api/webhook")
+	{
+		webhook.POST("/telegram", telegramHandler.Webhook)
+	}
 	return &Router{
 		router,
 	}, nil

@@ -44,14 +44,12 @@ func main() {
 	// telegramRepo := repository.NewTelegramRepository(resource.DB)
 	// telegramService := service.NewTelegramService(telegramRepo, roomRepo, cache)
 	telegramService := service.NewTelegramService()
-	// telegramHandler := http.NewTelegramHandler(telegramService)
-
-	fmt.Println("telegramService", telegramService)
+	telegramHandler := http.NewTelegramHandler(telegramService)
 
 	// Router
 	router, err := http.NewRouter(
 		config.HTTP,
-		// *telegramHandler,
+		*telegramHandler,
 	)
 	if err != nil {
 		log.Fatalf("Error initializing router", err)
