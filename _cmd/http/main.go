@@ -4,6 +4,7 @@ import (
 	"allchat-message-service/internal/adapter/config"
 	"allchat-message-service/internal/adapter/handler/http"
 	"allchat-message-service/internal/adapter/storage/mongoDB"
+	"allchat-message-service/internal/core/service"
 	"fmt"
 	"log"
 
@@ -42,7 +43,10 @@ func main() {
 	// //Telegram
 	// telegramRepo := repository.NewTelegramRepository(resource.DB)
 	// telegramService := service.NewTelegramService(telegramRepo, roomRepo, cache)
+	telegramService := service.NewTelegramService()
 	// telegramHandler := http.NewTelegramHandler(telegramService)
+
+	fmt.Println("telegramService", telegramService)
 
 	// Router
 	router, err := http.NewRouter(
