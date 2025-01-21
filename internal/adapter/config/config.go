@@ -10,9 +10,10 @@ type (
 	Container struct {
 		// App   *App
 		// Token *Token
-		Redis *Redis
-		DB    *DB
-		HTTP  *HTTP
+		Redis    *Redis
+		DB       *DB
+		HTTP     *HTTP
+		RabbitMQ *RabbitMQ
 	}
 	// // App contains all the environment variables for the application
 	// App struct {
@@ -43,6 +44,15 @@ type (
 		URL            string
 		Port           string
 		AllowedOrigins string
+	}
+	RabbitMQ struct {
+		Addr         string
+		User         string
+		Password     string
+		MqttProtocal string
+		AmqpProtocal string
+		MqttPort     string
+		AmqpPort     string
 	}
 )
 
@@ -84,11 +94,22 @@ func New() (*Container, error) {
 		AllowedOrigins: os.Getenv("HTTP_ALLOWED_ORIGINS"),
 	}
 
+	rabbitMQ := &RabbitMQ{
+		Addr:         os.Getenv("RABBITMQ_ADDR"),
+		User:         os.Getenv("RABBITMQ_USER"),
+		Password:     os.Getenv("RABBITMQ_PASSWORD"),
+		MqttProtocal: os.Getenv("RABBITMQ_MQTT_PROTOCOL"),
+		AmqpProtocal: os.Getenv("RABBITMQ_AMQP_PROTOCOL"),
+		MqttPort:     os.Getenv("RABBITMQ_MQTT_PORT"),
+		AmqpPort:     os.Getenv("RABBITMQ_AMQP_PORT"),
+	}
+
 	return &Container{
 		// app,
 		// token,
 		redis,
 		db,
 		http,
+		rabbitMQ,
 	}, nil
 }

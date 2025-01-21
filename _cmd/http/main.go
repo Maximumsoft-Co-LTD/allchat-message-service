@@ -3,6 +3,7 @@ package main
 import (
 	"allchat-message-service/internal/adapter/config"
 	"allchat-message-service/internal/adapter/handler/http"
+	rabbitmq "allchat-message-service/internal/adapter/handler/rabbitMQ"
 	"allchat-message-service/internal/adapter/storage/mongoDB"
 	"allchat-message-service/internal/adapter/storage/mongoDB/repository"
 	"allchat-message-service/internal/adapter/storage/redis"
@@ -38,6 +39,12 @@ func main() {
 		log.Fatalf("Error initializing cache connection", err)
 	}
 	defer cache.Close()
+
+	rabbitMQ, err := rabbitmq.NewMQTT(config.RabbitMQ)
+	if err != nil {
+		log.Fatalf("Error initializing rabbitMQ connection", err)
+	}
+	fmt.Println("rabbitMQ", rabbitMQ)
 
 	// Dependency injection
 	//Room
