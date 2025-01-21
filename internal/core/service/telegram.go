@@ -47,3 +47,10 @@ func (s *TelegramService) Webhook(c context.Context, body domain.TelegramWebhook
 	fmt.Println("webhook data", data)
 	return nil
 }
+
+func (s *TelegramService) InsertWebhookRawData(data any) error {
+	if err := s.tRepo.InsertWebhookRawData(data); err != nil {
+		return err
+	}
+	return nil
+}

@@ -40,11 +40,18 @@ func main() {
 	}
 	defer cache.Close()
 
-	rabbitMQ, err := rabbitmq.NewMQTT(config.RabbitMQ)
+	// Init rabbitMQ service
+	mqtt, err := rabbitmq.NewMQTT(config.RabbitMQ)
 	if err != nil {
 		log.Fatalf("Error initializing rabbitMQ connection", err)
 	}
-	fmt.Println("rabbitMQ", rabbitMQ)
+	fmt.Println("rabbitMQ mqtt ", mqtt)
+
+	// Init amqp service
+	amqp, err := rabbitmq.NewAMQP(config.RabbitMQ)
+	if err != nil {
+		log.Fatalf("Error initializing rabbitMQ connection", err)
+	}
 
 	// Dependency injection
 	//Room
@@ -53,7 +60,13 @@ func main() {
 	// //Telegram
 	telegramRepo := repository.NewTelegramRepository(resource.DB)
 	telegramService := service.NewTelegramService(telegramRepo, roomRepo, cache)
+	telegramSub := rabbitmq.NewTelegramSubscriber(telegramService)
 	telegramHandler := http.NewTelegramHandler(telegramService)
+
+	// amqp Subscribe
+	if err = amqp.RawDataWebhookSubscribe(*telegramSub); err != nil {
+		log.Fatalf("Error subscribing to raw_data", err)
+	}
 
 	// Router
 	router, err := http.NewRouter(

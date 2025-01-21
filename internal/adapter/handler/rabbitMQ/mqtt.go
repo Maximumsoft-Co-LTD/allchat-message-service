@@ -8,7 +8,7 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
-type RabbitMQ struct {
+type MqttRabbitClient struct {
 	client mqtt.Client
 }
 
@@ -28,8 +28,7 @@ var connectLostHandler mqtt.ConnectionLostHandler = func(client mqtt.Client, err
 	reconnect(client) // Attempt to reconnect
 }
 
-func NewMQTT(config *config.RabbitMQ) (*RabbitMQ, error) {
-	rabbitMQ := RabbitMQ{}
+func NewMQTT(config *config.RabbitMQ) (*MqttRabbitClient, error) {
 	opts := mqtt.NewClientOptions()
 	mqttURL := fmt.Sprintf("%s://%s:%s", config.MqttProtocal, config.Addr, config.MqttPort)
 	opts.AddBroker(mqttURL)
@@ -39,13 +38,15 @@ func NewMQTT(config *config.RabbitMQ) (*RabbitMQ, error) {
 	opts.OnConnect = connectHandler
 	opts.OnConnectionLost = connectLostHandler
 
-	rabbitMQ.client = mqtt.NewClient(opts)
-	if token := rabbitMQ.client.Connect(); token.Wait() && token.Error() != nil {
+	client := mqtt.NewClient(opts)
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		fmt.Println("Connection failed err : ", token.Error())
 		return nil, token.Error()
 	}
 
-	return &rabbitMQ, nil
+	return &MqttRabbitClient{
+		client,
+	}, nil
 }
 
 func reconnect(client mqtt.Client) {
@@ -73,6 +74,6 @@ func sub(client mqtt.Client) {
 	fmt.Printf("Subscribed to topic: %s\n", topic)
 }
 
-func (rb *RabbitMQ) Reconnect() {
+func (rb *MqttRabbitClient) Reconnect() {
 	reconnect(rb.client)
 }
