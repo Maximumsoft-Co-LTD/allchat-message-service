@@ -3,7 +3,8 @@ package main
 import (
 	"allchat-message-service/internal/adapter/config"
 	"allchat-message-service/internal/adapter/handler/http"
-	rabbitmq "allchat-message-service/internal/adapter/handler/rabbitMQ"
+	rabbitmq "allchat-message-service/internal/adapter/rabbitMQ/amqp"
+	"allchat-message-service/internal/adapter/rabbitMQ/amqp/pubsub"
 	"allchat-message-service/internal/adapter/storage/mongoDB"
 	"allchat-message-service/internal/adapter/storage/mongoDB/repository"
 	"allchat-message-service/internal/adapter/storage/redis"
@@ -40,18 +41,22 @@ func main() {
 	}
 	defer cache.Close()
 
-	// Init rabbitMQ service
-	mqtt, err := rabbitmq.NewMQTT(config.RabbitMQ)
-	if err != nil {
-		log.Fatalf("Error initializing rabbitMQ connection", err)
-	}
-	fmt.Println("rabbitMQ mqtt ", mqtt)
+	// // Init rabbitMQ service
+	// mqtt, err := rabbitmq.NewMQTT(config.RabbitMQ)
+	// if err != nil {
+	// 	log.Fatalf("Error initializing rabbitMQ connection", err)
+	// }
+	// fmt.Println("rabbitMQ mqtt ", mqtt)
 
 	// Init amqp service
 	amqp, err := rabbitmq.NewAMQP(config.RabbitMQ)
 	if err != nil {
 		log.Fatalf("Error initializing rabbitMQ connection", err)
 	}
+	defer amqp.Close()
+
+	// amqp Publish
+	publisher := pubsub.NewPublisher(amqp)
 
 	// Dependency injection
 	//Room
@@ -59,14 +64,17 @@ func main() {
 
 	// //Telegram
 	telegramRepo := repository.NewTelegramRepository(resource.DB)
-	telegramService := service.NewTelegramService(telegramRepo, roomRepo, cache)
-	telegramSub := rabbitmq.NewTelegramSubscriber(telegramService)
+	telegramService := service.NewTelegramService(telegramRepo, roomRepo, cache, publisher)
 	telegramHandler := http.NewTelegramHandler(telegramService)
+	telegramSub := pubsub.NewTelegramSubscriber(telegramService)
 
 	// amqp Subscribe
-	if err = amqp.RawDataWebhookSubscribe(*telegramSub); err != nil {
-		log.Fatalf("Error subscribing to raw_data", err)
-	}
+	subscriber := pubsub.NewSubscriber(amqp, *telegramSub)
+	go func() {
+		if err = subscriber.RawDataWebhookSubscribe(); err != nil {
+			log.Fatalf("Error subscribing to raw_data", err)
+		}
+	}()
 
 	// Router
 	router, err := http.NewRouter(

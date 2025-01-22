@@ -5,6 +5,7 @@ import (
 	"allchat-message-service/internal/core/port"
 	"allchat-message-service/internal/core/util"
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 )
@@ -13,13 +14,15 @@ type TelegramService struct {
 	tRepo port.TelegramRepository
 	rRepo port.RoomRepository
 	cache port.CacheRepository
+	amqp  port.AmqpPublisher
 }
 
-func NewTelegramService(tRepo port.TelegramRepository, rRepo port.RoomRepository, cache port.CacheRepository) *TelegramService {
+func NewTelegramService(tRepo port.TelegramRepository, rRepo port.RoomRepository, cache port.CacheRepository, amqp port.AmqpPublisher) *TelegramService {
 	return &TelegramService{
 		tRepo,
 		rRepo,
 		cache,
+		amqp,
 	}
 }
 
@@ -48,7 +51,20 @@ func (s *TelegramService) Webhook(c context.Context, body domain.TelegramWebhook
 	return nil
 }
 
-func (s *TelegramService) InsertWebhookRawData(data any) error {
+func (s *TelegramService) TestPublishQ(data any) error {
+	// Publish data to queue
+	fmt.Println("service publish q")
+	byteData, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	if err := s.amqp.Publish("raw_data", "raw_data", byteData); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *TelegramService) InsertWebhookRawData(data []any) error {
 	if err := s.tRepo.InsertWebhookRawData(data); err != nil {
 		return err
 	}

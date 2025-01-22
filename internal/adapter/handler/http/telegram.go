@@ -33,3 +33,12 @@ func (h *TelegramHandler) Webhook(c *gin.Context) {
 	h.svc.Webhook(c, req)
 	ResData(c, 200, "success", "", nil)
 }
+
+func (h *TelegramHandler) TestPublishQ(c *gin.Context) {
+	fmt.Println("test publish q")
+	data := "hello world"
+	if err := h.svc.TestPublishQ(data); err != nil {
+		fmt.Println("publish q err", err)
+	}
+	ResData(c, 200, "success", "", nil)
+}

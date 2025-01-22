@@ -26,6 +26,10 @@ func NewRouter(
 	{
 		webhook.POST("/telegram", telegramHandler.Webhook)
 	}
+	test := router.Group("/api/test")
+	{
+		test.POST("/publish-q", telegramHandler.TestPublishQ)
+	}
 	return &Router{
 		router,
 	}, nil

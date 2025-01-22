@@ -22,12 +22,12 @@ func NewTelegramRepository(DB *mongo.Database) *TelegramRepository {
 	}
 }
 
-func (r *TelegramRepository) InsertWebhookRawData(data any) error {
+func (r *TelegramRepository) InsertWebhookRawData(data []any) error {
 	// Insert webhook raw data
 	fmt.Println("repo create webhook telegram data")
 	c, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	_, err := r.DB.Collection(rawDataCollection).InsertOne(c, data)
+	_, err := r.DB.Collection(rawDataCollection).InsertMany(c, data)
 	if err != nil {
 		fmt.Println("err", err)
 		return err

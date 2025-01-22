@@ -1,21 +1,21 @@
-package rabbitmq
+package pubsub
 
 import (
 	"allchat-message-service/internal/core/port"
 	"fmt"
 )
 
-type TelegramSubscribe struct {
+type TelegramSubscriber struct {
 	tsv port.TelegramService
 }
 
-func NewTelegramSubscriber(tsv port.TelegramService) *TelegramSubscribe {
-	return &TelegramSubscribe{
+func NewTelegramSubscriber(tsv port.TelegramService) *TelegramSubscriber {
+	return &TelegramSubscriber{
 		tsv,
 	}
 }
 
-func (h *TelegramSubscribe) InsertWebhookRawData(data any) {
+func (h *TelegramSubscriber) InsertWebhookRawData(data []any) {
 	fmt.Println("receive telegram raw data")
 	// telegram := domain.Telegram
 	if err := h.tsv.InsertWebhookRawData(data); err != nil {
