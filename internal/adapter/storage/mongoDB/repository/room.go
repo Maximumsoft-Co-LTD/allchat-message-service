@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	collection = "room"
+	roomCollection = "room"
 )
 
 type RoomRepository struct {
@@ -29,7 +29,7 @@ func (r *RoomRepository) CreateRoom(c context.Context, room domain.Room) error {
 	// defer cancel()
 	fmt.Println("repo create room")
 	room.ID = primitive.NewObjectID()
-	_, err := r.DB.Collection(collection).InsertOne(c, room)
+	_, err := r.DB.Collection(roomCollection).InsertOne(c, room)
 	if err != nil {
 		fmt.Println("err", err)
 		return err

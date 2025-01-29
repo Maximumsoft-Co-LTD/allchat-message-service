@@ -24,7 +24,10 @@ func New(config *config.DB) (*Resource, error) {
 	_ = godotenv.Load()
 	var err error
 	var client *mongo.Client
-	client, err = mongo.NewClient(
+	ctx, cancel := context.WithTimeout(context.Background(), connectTimeout*time.Second)
+	defer cancel()
+	client, err = mongo.Connect(
+		ctx,
 		options.Client().ApplyURI(config.Connection),
 		options.Client().SetMinPoolSize(1),
 		options.Client().SetMaxPoolSize(2),
@@ -32,10 +35,7 @@ func New(config *config.DB) (*Resource, error) {
 	if err != nil {
 		return nil, err
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), connectTimeout*time.Second)
-	defer cancel()
 
-	_ = client.Connect(ctx)
 	err = client.Ping(ctx, nil)
 	if err != nil {
 		return nil, err

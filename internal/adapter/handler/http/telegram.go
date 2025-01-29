@@ -23,14 +23,14 @@ type SetWebhookRequest struct {
 }
 
 func (h *TelegramHandler) Webhook(c *gin.Context) {
-	var req domain.TelegramWebhookReq2
+	var req domain.TelegramWebhook
 	// Set webhook
 	if err := c.ShouldBind(&req); err != nil {
 	}
 
 	fmt.Println("handle webhook")
 	// telegram := domain.Telegram
-	h.svc.Webhook(c, req)
+	h.svc.Webhook(c, c.Param("id"), req)
 	ResData(c, 200, "success", "", nil)
 }
 

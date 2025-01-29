@@ -15,7 +15,7 @@ func NewTelegramSubscriber(tsv port.TelegramService) *TelegramSubscriber {
 	}
 }
 
-func (h *TelegramSubscriber) InsertWebhookRawData(data []any) {
+func (h *TelegramSubscriber) InsertWebhookRawData(data any) {
 	fmt.Println("receive telegram raw data")
 	// telegram := domain.Telegram
 	if err := h.tsv.InsertWebhookRawData(data); err != nil {

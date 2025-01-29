@@ -14,6 +14,7 @@ type (
 		DB       *DB
 		HTTP     *HTTP
 		RabbitMQ *RabbitMQ
+		AWS      *AWS
 	}
 	// // App contains all the environment variables for the application
 	// App struct {
@@ -53,6 +54,14 @@ type (
 		AmqpProtocal string
 		MqttPort     string
 		AmqpPort     string
+	}
+
+	AWS struct {
+		AwsS3Region        string
+		AwsS3Bucket        string
+		AwsAccessKeyID     string
+		AwsSecretAccessKey string
+		DomainUrlS3        string
 	}
 )
 
@@ -104,6 +113,14 @@ func New() (*Container, error) {
 		AmqpPort:     os.Getenv("RABBITMQ_AMQP_PORT"),
 	}
 
+	aws := &AWS{
+		AwsS3Region:        os.Getenv("AWS_S3_REGION"),
+		AwsS3Bucket:        os.Getenv("AWS_S3_BUCKET"),
+		AwsAccessKeyID:     os.Getenv("AWS_ACCESS_KEY_ID"),
+		AwsSecretAccessKey: os.Getenv("AWS_SECRET_ACCESS_KEY"),
+		DomainUrlS3:        os.Getenv("DOMAIN_URL_S3"),
+	}
+
 	return &Container{
 		// app,
 		// token,
@@ -111,5 +128,6 @@ func New() (*Container, error) {
 		db,
 		http,
 		rabbitMQ,
+		aws,
 	}, nil
 }

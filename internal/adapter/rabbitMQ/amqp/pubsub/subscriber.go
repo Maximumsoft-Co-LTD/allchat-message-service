@@ -62,7 +62,7 @@ func (s *Subscriber) RawDataWebhookSubscribe() error {
 
 	go func() {
 		tmpD := amqp.Delivery{}
-		telegramMessages := []any{}
+		// telegramMessages := []any{}
 		for d := range msgs {
 			var message MessagePublish
 			if err := json.Unmarshal(d.Body, &message); err != nil {
@@ -73,14 +73,15 @@ func (s *Subscriber) RawDataWebhookSubscribe() error {
 
 				switch v := message.Type; v {
 				case "telegram":
-					telegramMessages = append(telegramMessages, message.Data)
+					// telegramMessages = append(telegramMessages, message.Data)
+					s.telegramSubscriber.InsertWebhookRawData(message)
 				}
 				// case "line":
 				// 	lineSub.InsertRawData(message.Data)
 			}
 			tmpD = d
 		}
-		s.telegramSubscriber.InsertWebhookRawData(telegramMessages)
+		// s.telegramSubscriber.InsertWebhookRawData(telegramMessages)
 		tmpD.Ack(true) // Manually acknowledge the message
 	}()
 

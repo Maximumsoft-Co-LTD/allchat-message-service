@@ -10,7 +10,7 @@ type TelegramRepository interface {
 }
 
 type TelegramService interface {
-	Webhook(c context.Context, body domain.TelegramWebhookReq2) error
+	Webhook(c context.Context, id string, body domain.TelegramWebhook) error
 	TestPublishQ(data any) error
-	InsertWebhookRawData(data []any) error
+	InsertWebhookRawData(data any) error
 }
