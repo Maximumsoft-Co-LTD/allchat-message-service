@@ -1,4 +1,4 @@
-package util
+package httprequest
 
 import (
 	"errors"
@@ -9,7 +9,14 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-func GetUserImageTelegramUrl(token string, id int64) (string, error) {
+type httpReqTelegram struct {
+}
+
+func NewHTTPReqTelegram() *httpReqTelegram {
+	return &httpReqTelegram{}
+}
+
+func (rt *httpReqTelegram) GetUserImageTelegramUrl(token string, id int64) (string, error) {
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		return "", err
@@ -44,7 +51,7 @@ func GetUserImageTelegramUrl(token string, id int64) (string, error) {
 	}
 }
 
-func GetFileTelegramFromUrl(path string) ([]byte, error) {
+func (rt *httpReqTelegram) GetFileTelegramFromUrl(path string) ([]byte, error) {
 	method := "GET"
 	client := &http.Client{}
 	req, err := http.NewRequest(method, path, nil)

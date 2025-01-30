@@ -3,8 +3,10 @@ package main
 import (
 	"allchat-message-service/internal/adapter/config"
 	"allchat-message-service/internal/adapter/handler/http"
-	rabbitmq "allchat-message-service/internal/adapter/rabbitMQ/amqp"
-	"allchat-message-service/internal/adapter/rabbitMQ/amqp/pubsub"
+	httprequest "allchat-message-service/internal/adapter/handler/httpReq"
+	rabbitmq "allchat-message-service/internal/adapter/messageBroker/rabbitMQ/amqp"
+	"allchat-message-service/internal/adapter/messageBroker/rabbitMQ/amqp/pubsub"
+	"allchat-message-service/internal/adapter/storage/aws"
 	"allchat-message-service/internal/adapter/storage/mongoDB"
 	"allchat-message-service/internal/adapter/storage/mongoDB/repository"
 	"allchat-message-service/internal/adapter/storage/redis"
@@ -41,6 +43,11 @@ func main() {
 	}
 	defer cache.Close()
 
+	imgStorage, err := aws.NewAws(config.AWS)
+	if err != nil {
+		log.Fatalf("Error initializing aws connection", err)
+	}
+
 	// // Init rabbitMQ service
 	// mqtt, err := rabbitmq.NewMQTT(config.RabbitMQ)
 	// if err != nil {
@@ -59,12 +66,16 @@ func main() {
 	publisher := pubsub.NewPublisher(amqp)
 
 	// Dependency injection
+	//Platform
+	platformRepo := repository.NewPlatformRepository(resource.DB)
+
 	//Room
 	roomRepo := repository.NewRoomRepository(resource.DB)
 
 	// //Telegram
+	telegramHTTPReq := httprequest.NewHTTPReqTelegram()
 	telegramRepo := repository.NewTelegramRepository(resource.DB)
-	telegramService := service.NewTelegramService(telegramRepo, roomRepo, cache, publisher)
+	telegramService := service.NewTelegramService(telegramRepo, roomRepo, platformRepo, cache, publisher, telegramHTTPReq, imgStorage)
 	telegramHandler := http.NewTelegramHandler(telegramService)
 	telegramSub := pubsub.NewTelegramSubscriber(telegramService)
 

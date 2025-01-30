@@ -1,7 +1,7 @@
 package http
 
 import (
-	"allchat-message-service/internal/core/domain"
+	"allchat-message-service/internal/adapter/handler/model"
 	"allchat-message-service/internal/core/port"
 	"fmt"
 
@@ -23,14 +23,22 @@ type SetWebhookRequest struct {
 }
 
 func (h *TelegramHandler) Webhook(c *gin.Context) {
-	var req domain.TelegramWebhook
+	var req model.TelegramWebhook
 	// Set webhook
 	if err := c.ShouldBind(&req); err != nil {
+		fmt.Println("error bind", err)
+		return
+	}
+
+	body, err := newTelegramWebhookReq(req)
+	if err != nil {
+		fmt.Println("error newTelegramWebhookReq", err)
+		return
 	}
 
 	fmt.Println("handle webhook")
 	// telegram := domain.Telegram
-	h.svc.Webhook(c, c.Param("id"), req)
+	h.svc.Webhook(c, c.Param("id"), body)
 	ResData(c, 200, "success", "", nil)
 }
 

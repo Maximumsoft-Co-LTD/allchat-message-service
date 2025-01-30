@@ -12,20 +12,24 @@ import (
 )
 
 type TelegramService struct {
-	tRepo port.TelegramRepository
-	rRepo port.RoomRepository
-	pRepo port.PlatformRepository
-	cache port.CacheRepository
-	amqp  port.AmqpPublisher
+	tRepo   port.TelegramRepository
+	rRepo   port.RoomRepository
+	pRepo   port.PlatformRepository
+	cache   port.CacheRepository
+	amqp    port.AmqpPublisher
+	httpReq port.TelegramHTTPReq
+	aws     port.AWSRepository
 }
 
-func NewTelegramService(tRepo port.TelegramRepository, rRepo port.RoomRepository, pRepo port.PlatformRepository, cache port.CacheRepository, amqp port.AmqpPublisher) *TelegramService {
+func NewTelegramService(tRepo port.TelegramRepository, rRepo port.RoomRepository, pRepo port.PlatformRepository, cache port.CacheRepository, amqp port.AmqpPublisher, httpReq port.TelegramHTTPReq, aws port.AWSRepository) *TelegramService {
 	return &TelegramService{
 		tRepo,
 		rRepo,
 		pRepo,
 		cache,
 		amqp,
+		httpReq,
+		aws,
 	}
 }
 
@@ -144,19 +148,17 @@ func (s *TelegramService) getUserImageTelegram(c context.Context, platform domai
 		return imageUrlRedis, nil // if there is data in redis return data
 	}
 
-	imageUrl, err := util.GetUserImageTelegramUrl(platform.AccessToken, form.ID)
+	imageUrl, err := s.httpReq.GetUserImageTelegramUrl(platform.AccessToken, form.ID)
 	if err != nil {
 		imageUrl = ""
 	} else {
-		//TODO:กลับมาทำต่อ
-		// imageByte, err := util.GetFileTelegramFromUrl(imageUrl)
-		// if err != nil {
-		// 	imageUrl = ""
-		// } else {
-		// 	//TODO: ทำถึงฟังก์ชันนี้
-		// 	url, _ := helper.UploadFile(strconv.Itoa(int(form.ID)), imageByte, platform.PageID, "")
-		// 	imageUrl = url
-		// }
+		imageByte, err := s.httpReq.GetFileTelegramFromUrl(imageUrl)
+		if err != nil {
+			imageUrl = ""
+		} else {
+			url, _ := s.aws.UploadFile(strconv.Itoa(int(form.ID)), imageByte, platform.PageID, "")
+			imageUrl = url
+		}
 	}
 	//TODO: ทำต่อ
 	// go SaveuserImageTelegramToRadis(imageUrl, key)

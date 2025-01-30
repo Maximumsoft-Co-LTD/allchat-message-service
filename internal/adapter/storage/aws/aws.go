@@ -21,13 +21,14 @@ type Aws struct {
 	domainUrlS3 string
 }
 
-func NewAws(config *config.AWS) *Aws {
+func NewAws(config *config.AWS) (*Aws, error) {
 	session, err := session.NewSession(&aws.Config{
 		Region:      aws.String(config.AwsS3Region),
 		Credentials: credentials.NewStaticCredentials(config.AwsAccessKeyID, config.AwsSecretAccessKey, ""),
 	})
 	if err != nil {
 		log.Fatalf("Error creating session: %s", err)
+		return nil, err
 	}
 
 	svc := s3.New(session)
@@ -37,7 +38,7 @@ func NewAws(config *config.AWS) *Aws {
 		svc,
 		config.AwsS3Bucket,
 		config.DomainUrlS3,
-	}
+	}, nil
 }
 
 func (a *Aws) UploadFile(fileName string, fileData []byte, path string, username string) (string, error) {

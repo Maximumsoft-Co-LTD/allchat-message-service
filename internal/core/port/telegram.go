@@ -14,3 +14,8 @@ type TelegramService interface {
 	TestPublishQ(data any) error
 	InsertWebhookRawData(data any) error
 }
+
+type TelegramHTTPReq interface {
+	GetUserImageTelegramUrl(token string, id int64) (string, error)
+	GetFileTelegramFromUrl(path string) ([]byte, error)
+}

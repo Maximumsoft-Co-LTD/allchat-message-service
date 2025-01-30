@@ -1,7 +1,7 @@
 package pubsub
 
 import (
-	rabbitmq "allchat-message-service/internal/adapter/rabbitMQ/amqp"
+	rabbitmq "allchat-message-service/internal/adapter/messageBroker/rabbitMQ/amqp"
 	"encoding/json"
 	"fmt"
 
